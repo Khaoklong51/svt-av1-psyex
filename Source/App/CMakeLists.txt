@@ -27,8 +27,12 @@ if(LIBDOVI_FOUND)
   pkg_check_modules(PC_LIBDOVI dovi QUIET)
   endif()
 
-  find_library(LIBDOVI_LIBRARY NAMES dovi libdovi
-                               PATHS ${PC_LIBDOVI_LIBDIR})
+  if (BUILD_SHARED_LIBS)
+    find_library(LIBDOVI_LIBRARY NAMES dovi libdovi PATHS ${PC_LIBDOVI_LIBDIR})
+  else()
+    find_library(LIBDOVI_LIBRARY NAMES dovi.a libdovi.a PATHS ${PC_LIBDOVI_LIBDIR})
+  endif()
+
   if(NOT LIBDOVI_LIBRARY)
   message(FATAL_ERROR "dovi library not found!")
   endif()
@@ -50,9 +54,13 @@ if(LIBHDR10PLUS_RS_FOUND)
   if(PKG_CONFIG_FOUND)
   pkg_check_modules(PC_LIBHDR10PLUS_RS hdr10plus-rs QUIET)
   endif()
+  
+  if (BUILD_SHARED_LIBS)
+    find_library(LIBHDR10PLUS_RS_LIBRARY NAMES hdr10plus-rs libhdr10plus-rs PATHS ${PC_LIBHDR10PLUS_RS_LIBDIR})
+  else()
+    find_library(LIBHDR10PLUS_RS_LIBRARY NAMES hdr10plus-rs.a libhdr10plus-rs.a PATHS ${PC_LIBHDR10PLUS_RS_LIBDIR})
+  endif()
 
-  find_library(LIBHDR10PLUS_RS_LIBRARY NAMES hdr10plus-rs libhdr10plus-rs
-                               PATHS ${PC_LIBHDR10PLUS_RS_LIBDIR})
   if(NOT LIBHDR10PLUS_RS_LIBRARY)
   message(FATAL_ERROR "hdr10plus library not found!")
   endif()
