@@ -40,7 +40,7 @@ if(LIBDOVI_FOUND)
   find_path(LIBDOVI_INCLUDE_DIR NAMES libdovi/rpu_parser.h
                                 PATHS ${PC_LIBDOVI_INCLUDEDIR})
 
-  set(LIBDOVI_INCLUDE_DIRS ${LIBDOVI_INCLUDE_DIR})
+  include_directories(${LIBDOVI_INCLUDE_DIR})
   set(LIBDOVI_LIBRARIES ${LIBDOVI_LIBRARY})
   add_definitions(-DLIBDOVI_FOUND=1)
   execute_process(COMMAND ${CMAKE_COMMAND} -E echo_append "-- Building with dovi support - Yes\n")
@@ -68,7 +68,7 @@ if(LIBHDR10PLUS_RS_FOUND)
   find_path(LIBHDR10PLUS_RS_INCLUDE_DIR NAMES libhdr10plus-rs/hdr10plus.h
                                 PATHS ${PC_LIBHDR10PLUS_RS_INCLUDEDIR})
 
-  set(LIBHDR10PLUS_RS_INCLUDE_DIRS ${LIBHDR10PLUS_RS_INCLUDE_DIR})
+  include_directories(${LIBHDR10PLUS_RS_INCLUDE_DIR})
   set(LIBHDR10PLUS_RS_LIBRARIES ${LIBHDR10PLUS_RS_LIBRARY})
   add_definitions(-DLIBHDR10PLUS_RS_FOUND=1)
   execute_process(COMMAND ${CMAKE_COMMAND} -E echo_append "-- Building with hdr10plus support - Yes\n")
