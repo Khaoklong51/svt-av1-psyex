@@ -917,12 +917,12 @@ EbErrorType svt_av1_verify_settings(SequenceControlSet *scs) {
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->low_q_taper > 1) {
+    if (config->low_q_taper != 0 && config->low_q_taper != 1) {
         SVT_ERROR("Instance %u: low-q-taper must be between 0 and 1\n", channel_number + 1);
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->sharp_tx > 1) {
+    if (config->sharp_tx != 0 && config->sharp_tx != 1) {
         SVT_ERROR("Instance %u: sharp-tx must be either 0 and 1\n", channel_number + 1);
         return_error = EB_ErrorBadParameter;
     }
@@ -932,7 +932,7 @@ EbErrorType svt_av1_verify_settings(SequenceControlSet *scs) {
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->complex_hvs > 1) {
+    if (config->complex_hvs != 0 && config->complex_hvs != 1) {
         SVT_ERROR("Instance %u: complex-hvs must be between 0 and 1\n", channel_number + 1);
         return_error = EB_ErrorBadParameter;
     }
@@ -2143,8 +2143,6 @@ EB_API EbErrorType svt_av1_enc_parse_parameter(EbSvtAv1EncConfiguration *config_
         {"tf-strength", &config_struct->tf_strength},
         {"spy-rd", &config_struct->spy_rd},
         {"hbd-mds", &config_struct->hbd_mds},
-        {"sharp-tx", &config_struct->sharp_tx},
-        {"complex-hvs", &config_struct->complex_hvs},
     };
     const size_t uint8_opts_size = sizeof(uint8_opts) / sizeof(uint8_opts[0]);
 
@@ -2265,6 +2263,8 @@ EB_API EbErrorType svt_av1_enc_parse_parameter(EbSvtAv1EncConfiguration *config_
         {"avif", &config_struct->avif},
         {"max-32-tx-size", &config_struct->max_32_tx_size},
         {"low-q-taper", &config_struct->low_q_taper},
+        {"sharp-tx", &config_struct->sharp_tx},
+        {"complex-hvs", &config_struct->complex_hvs},
     };
     const size_t bool_opts_size = sizeof(bool_opts) / sizeof(bool_opts[0]);
 
