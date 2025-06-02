@@ -1034,7 +1034,7 @@ typedef struct EbSvtAv1EncConfiguration {
      * 1: enabled
      * Default is 1
      */
-     uint8_t sharp_tx;
+     bool sharp_tx;
 
      /**
      * @brief High Bit-Depth Mode Decision, used to control the bit-depth of the mode decision path.
@@ -1053,7 +1053,7 @@ typedef struct EbSvtAv1EncConfiguration {
      * 1: highest complexity HVS model (SSD-Psy)
      * Default is 0
      */
-     uint8_t complex_hvs;
+     bool complex_hvs;
 
     /*Add 128 Byte Padding to Struct to avoid changing the size of the public configuration struct*/
     uint8_t padding[128 - 2 * sizeof(bool) - 10 * sizeof(uint8_t) - sizeof(double)];
