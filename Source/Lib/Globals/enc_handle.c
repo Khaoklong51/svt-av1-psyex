@@ -4580,7 +4580,7 @@ static void copy_api_from_app(
         SVT_WARN("Quantization matrices will be turned off for presets 5 and higher on NEON-enabled environments\n");
     }else if (scs->static_config.enable_qm && scs->static_config.lossless) {
         SVT_WARN("Quantization matrices will be forced off since lossless coding is applied\n");
-        scs->static_config.enable_qm = 0;   
+        scs->static_config.enable_qm = 0;
     }
 #endif
 
@@ -4621,7 +4621,7 @@ static void copy_api_from_app(
 
     // Spy rd
     scs->static_config.spy_rd = config_struct->spy_rd;
-	
+
     // Low Q taper
     scs->static_config.low_q_taper = config_struct->low_q_taper;
 
@@ -5727,7 +5727,7 @@ EB_API const char *svt_psy_get_version(void) {
 
 EB_API void svt_av1_print_version(void) {
     SVT_INFO("-------------------------------------------\n");
-    SVT_INFO("SVT [version]:\tSVT-AV1-PSY Encoder Lib %s\n", SVT_AV1_CVS_VERSION);
+    SVT_INFO("SVT [version]:\tSVT-AV1-PSY-K Encoder Lib %s\n", SVT_AV1_CVS_VERSION);
     const char *compiler =
 #if defined(__clang__)
     __VERSION__ "\t"
