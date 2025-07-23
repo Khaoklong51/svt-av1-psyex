@@ -999,7 +999,7 @@ typedef struct EbSvtAv1EncConfiguration {
      * 2: 10 + (4 - 2) = 12 (2x weaker)
      * 3: 10 + (4 - 3) = 11 (mainline default)
      * 4: 10 + (4 - 4) = 10 (2x stronger) */
-     uint8_t kf_tf_strength;
+    uint8_t kf_tf_strength;
 
     /**
      * @brief Enable psychovisual rate distortion
@@ -1007,7 +1007,7 @@ typedef struct EbSvtAv1EncConfiguration {
      * 4.00: enable PSY-RD with a strength of 4.00
      * Default is 0.00.
      */
-     double psy_rd;
+    double psy_rd;
 
     /**
      * @brief Enable spy-rd, an alternate RD metric that biases towards sharpness/detail retention,
@@ -1017,15 +1017,14 @@ typedef struct EbSvtAv1EncConfiguration {
      * 2: partial (interpolation filter tweaks only)
      * Default is 0
      */
-     uint8_t spy_rd;
+    uint8_t spy_rd;
 
     /**
      * @brief Prevent macroblocks from being boosted to very low q.
      *
      * Default is 0. 0 = off, 1 = on.
      */
-     bool low_q_taper;
-
+    bool low_q_taper;
 
     /**
      * @brief Enable sharp-tx, a toggle that enables much sharper transforms decisions for higher fidelity ouput,
@@ -1034,9 +1033,9 @@ typedef struct EbSvtAv1EncConfiguration {
      * 1: enabled
      * Default is 1
      */
-     bool sharp_tx;
+    bool sharp_tx;
 
-     /**
+    /**
      * @brief High Bit-Depth Mode Decision, used to control the bit-depth of the mode decision path.
      * 0: default behavior
      * 1: full 10-bit MD
@@ -1044,16 +1043,16 @@ typedef struct EbSvtAv1EncConfiguration {
      * 3: full 8-bit MD
      * Default is 0
      */
-     uint8_t hbd_mds;
+    uint8_t hbd_mds;
 
-     /**
+    /**
      * @brief Enable complex-hvs, a feature that enables the highest complexity and highest fidelity
      HVS model at the cost of higher CPU time
      * 0: default preset behavior
      * 1: highest complexity HVS model (SSD-Psy)
      * Default is 0
      */
-     bool complex_hvs;
+    bool complex_hvs;
 
     /*Add 128 Byte Padding to Struct to avoid changing the size of the public configuration struct*/
     uint8_t padding[128 - 2 * sizeof(bool) - 10 * sizeof(uint8_t) - sizeof(double)];

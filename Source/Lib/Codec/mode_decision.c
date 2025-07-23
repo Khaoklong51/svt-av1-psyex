@@ -52,7 +52,6 @@ bool svt_av1_is_lossless_segment(PictureControlSet *pcs, int8_t segment_id) {
         return pcs->lossless[0];
 }
 
-
 static bool check_mv_validity(int16_t x_mv, int16_t y_mv, uint8_t need_shift) {
     MV mv;
     //go to 1/8th if input is 1/4pel

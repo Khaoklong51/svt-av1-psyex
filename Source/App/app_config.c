@@ -442,7 +442,7 @@ static EbErrorType set_cfg_dovi_rpu(EbConfig *cfg, const char *token, const char
 static EbErrorType set_cfg_hdr10plus_json(EbConfig *cfg, const char *token, const char *value) {
     printf("Svt[info]: Parsing HDR10+ JSON file...\n");
     Hdr10PlusRsJsonOpaque *hdr10plus_json = hdr10plus_rs_parse_json(value);
-    const char *error = hdr10plus_rs_json_get_error(hdr10plus_json);
+    const char            *error          = hdr10plus_rs_json_get_error(hdr10plus_json);
     if (error) {
         fprintf(stderr, "%s\n", error);
         hdr10plus_rs_json_free(hdr10plus_json);
@@ -1113,7 +1113,8 @@ ConfigEntry config_entry_specific[] = {
     // --- end: ALTREF_FILTERING_SUPPORT
     {SINGLE_INPUT,
      TUNE_TOKEN,
-     "Optimize the encoding process for different desired outcomes [0 = VQ, 1 = PSNR, 2 = SSIM, 3 = Subjective SSIM, 4 = Still Picture], "
+     "Optimize the encoding process for different desired outcomes [0 = VQ, 1 = PSNR, 2 = SSIM, 3 = Subjective SSIM, 4 "
+     "= Still Picture], "
      "default is 2 "
      "[0-4]",
      set_cfg_generic_token},
@@ -1238,18 +1239,12 @@ ConfigEntry config_entry_color_description[] = {
      "Set content light level in the format of \"max_cll,max_fall\", refer to the user guide "
      "Appendix A.2",
      set_cfg_generic_token},
-    // Dolby Vision RPU
+// Dolby Vision RPU
 #ifdef LIBDOVI_FOUND
-    {SINGLE_INPUT,
-     DOLBY_VISION_RPU_TOKEN,
-     "[PSY] Set the Dolby Vision RPU path",
-     set_cfg_dovi_rpu},
+    {SINGLE_INPUT, DOLBY_VISION_RPU_TOKEN, "[PSY] Set the Dolby Vision RPU path", set_cfg_dovi_rpu},
 #endif
 #ifdef LIBHDR10PLUS_RS_FOUND
-    {SINGLE_INPUT,
-     HDR10PLUS_JSON_TOKEN,
-     "[PSY] Set the HDR10+ JSON file path",
-     set_cfg_hdr10plus_json},
+    {SINGLE_INPUT, HDR10PLUS_JSON_TOKEN, "[PSY] Set the HDR10+ JSON file path", set_cfg_hdr10plus_json},
 #endif
     // Termination
     {SINGLE_INPUT, NULL, NULL, NULL}};
@@ -1261,28 +1256,67 @@ ConfigEntry config_entry_variance_boost[] = {
     {SINGLE_INPUT, VARIANCE_OCTILE_TOKEN, "Octile for variance boost, default is 6 [1-8]", set_cfg_generic_token},
     {SINGLE_INPUT, VARIANCE_BOOST_CURVE_TOKEN, "Curve for variance boost, default is 0 [0-2]", set_cfg_generic_token},
     // QP scale compress
-    {SINGLE_INPUT, QP_SCALE_COMPRESS_STRENGTH_TOKEN, "[PSY] QP scale compress strength, default is 1 [0-3]", set_cfg_generic_token},
+    {SINGLE_INPUT,
+     QP_SCALE_COMPRESS_STRENGTH_TOKEN,
+     "[PSY] QP scale compress strength, default is 1 [0-3]",
+     set_cfg_generic_token},
     // Max 32 tx size
-    {SINGLE_INPUT, MAX_32_TX_SIZE_TOKEN, "[PSY] Limits the allowed transform sizes to a maximum of 32x32, default is 0 [0-1]", set_cfg_generic_token},
+    {SINGLE_INPUT,
+     MAX_32_TX_SIZE_TOKEN,
+     "[PSY] Limits the allowed transform sizes to a maximum of 32x32, default is 0 [0-1]",
+     set_cfg_generic_token},
     // Min/max chroma qm
-    {SINGLE_INPUT, MIN_CHROMA_QM_LEVEL_TOKEN, "[PSY] Min chroma quant matrix flatness, default is 8 [0-15]", set_cfg_generic_token},
-    {SINGLE_INPUT, MAX_CHROMA_QM_LEVEL_TOKEN, "[PSY] Max chroma quant matrix flatness, default is 15 [0-15]", set_cfg_generic_token},
+    {SINGLE_INPUT,
+     MIN_CHROMA_QM_LEVEL_TOKEN,
+     "[PSY] Min chroma quant matrix flatness, default is 8 [0-15]",
+     set_cfg_generic_token},
+    {SINGLE_INPUT,
+     MAX_CHROMA_QM_LEVEL_TOKEN,
+     "[PSY] Max chroma quant matrix flatness, default is 15 [0-15]",
+     set_cfg_generic_token},
     //Noise normalisation strength
-    {SINGLE_INPUT, NOISE_NORM_STRENGTH_TOKEN, "[PSY] Noise normalization strength, default is 1; recommended value for tune 3 is 3 [0-4]", set_cfg_generic_token},
+    {SINGLE_INPUT,
+     NOISE_NORM_STRENGTH_TOKEN,
+     "[PSY] Noise normalization strength, default is 1; recommended value for tune 3 is 3 [0-4]",
+     set_cfg_generic_token},
     //Alt-ref temporal filtering strength on keyframes
-    {SINGLE_INPUT, KF_TF_STRENGTH_FILTER_TOKEN, "[PSY] Adjust alt-ref TF strength on keyframes, default is 1 (4x weaker than mainline) [0-4]", set_cfg_generic_token},
+    {SINGLE_INPUT,
+     KF_TF_STRENGTH_FILTER_TOKEN,
+     "[PSY] Adjust alt-ref TF strength on keyframes, default is 1 (4x weaker than mainline) [0-4]",
+     set_cfg_generic_token},
     //Psy-rd
-    {SINGLE_INPUT, PSY_RD_TOKEN, "[PSY] Psychovisual rate distortion strength, default is 0.5; high quality mode activated at >=0.6 and <=P6 (P-1 enables complex HVS model) [0.0-6.0]", set_cfg_generic_token},
+    {SINGLE_INPUT,
+     PSY_RD_TOKEN,
+     "[PSY] Psychovisual rate distortion strength, default is 0.5; high quality mode activated at >=0.6 and <=P6 (P-1 "
+     "enables complex HVS model) [0.0-6.0]",
+     set_cfg_generic_token},
     //Spy-rd
-    {SINGLE_INPUT, SPY_RD_TOKEN, "[PSY] Alternative psychovisual rate distortion pathways, default is 0 [0-2]; 1 = full, 2 = partial", set_cfg_generic_token},
+    {SINGLE_INPUT,
+     SPY_RD_TOKEN,
+     "[PSY] Alternative psychovisual rate distortion pathways, default is 0 [0-2]; 1 = full, 2 = partial",
+     set_cfg_generic_token},
     //Low Q Taper
-    {SINGLE_INPUT, LOW_Q_TAPER_TOKEN, "Low q taper. If macroblocks are boosted below q11, taper the effect. Default is 0 (off) [0-1]", set_cfg_generic_token},
+    {SINGLE_INPUT,
+     LOW_Q_TAPER_TOKEN,
+     "Low q taper. If macroblocks are boosted below q11, taper the effect. Default is 0 (off) [0-1]",
+     set_cfg_generic_token},
     //Sharp-tx
-    {SINGLE_INPUT, SHARP_TX_TOKEN, "[PSY] Sharp transform optimization, default is 1; best used in combination with psy-rd [0-1]", set_cfg_generic_token},
+    {SINGLE_INPUT,
+     SHARP_TX_TOKEN,
+     "[PSY] Sharp transform optimization, default is 1; best used in combination with psy-rd [0-1]",
+     set_cfg_generic_token},
     //HBD Mode Decisions
-    {SINGLE_INPUT, HBD_MDS_TOKEN, "[PSY] High Bit-Depth Mode Decision, default is 0 [0: default preset behavior, 1 = 10-bit, 2 = hybrid 8/10-bit, 3 = 8-bit]", set_cfg_generic_token},
+    {SINGLE_INPUT,
+     HBD_MDS_TOKEN,
+     "[PSY] High Bit-Depth Mode Decision, default is 0 [0: default preset behavior, 1 = 10-bit, 2 = hybrid 8/10-bit, 3 "
+     "= 8-bit]",
+     set_cfg_generic_token},
     //Complex HVS
-    {SINGLE_INPUT, COMPLEX_HVS_TOKEN, "[PSY] Enable highest complexity HVS model, default is 0 [0: default preset behavior, 1: complex HVS model based on PSNR-HVS]", set_cfg_generic_token},
+    {SINGLE_INPUT,
+     COMPLEX_HVS_TOKEN,
+     "[PSY] Enable highest complexity HVS model, default is 0 [0: default preset behavior, 1: complex HVS model based "
+     "on PSNR-HVS]",
+     set_cfg_generic_token},
     // Termination
     {SINGLE_INPUT, NULL, NULL, NULL}};
 
@@ -1480,7 +1514,7 @@ ConfigEntry config_entry[] = {
     // QP scale compression
     {SINGLE_INPUT, QP_SCALE_COMPRESS_STRENGTH_TOKEN, "QpScaleCompressStrength", set_cfg_generic_token},
 
-     // Max 32 tx size
+    // Max 32 tx size
     {SINGLE_INPUT, MAX_32_TX_SIZE_TOKEN, "Max32TxSize", set_cfg_generic_token},
 
     // Chroma QM
@@ -1499,7 +1533,7 @@ ConfigEntry config_entry[] = {
     // Spy rd
     {SINGLE_INPUT, SPY_RD_TOKEN, "SpyRd", set_cfg_generic_token},
 
-	// Low q taper
+    // Low q taper
     {SINGLE_INPUT, LOW_Q_TAPER_TOKEN, "LowQTaper", set_cfg_generic_token},
 
     // Sharp TX
@@ -1527,12 +1561,12 @@ EbConfig *svt_config_ctor() {
     app_cfg->injector_frame_rate = 60;
     app_cfg->roi_map_file        = NULL;
 #ifdef LIBDOVI_FOUND
-    app_cfg->dovi_rpus           = NULL;
+    app_cfg->dovi_rpus = NULL;
 #endif
 #ifdef LIBHDR10PLUS_RS_FOUND
-    app_cfg->hdr10plus_json      = NULL;
+    app_cfg->hdr10plus_json = NULL;
 #endif
-    app_cfg->fgs_table_path      = NULL;
+    app_cfg->fgs_table_path = NULL;
 
     return app_cfg;
 }

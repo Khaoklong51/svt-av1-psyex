@@ -232,11 +232,9 @@ EbErrorType svt_av1_verify_settings(SequenceControlSet *scs) {
         return_error = EB_ErrorBadParameter;
     }
 
-    if ((config->enable_adaptive_quantization || config->variance_boost_strength) && config->extended_crf_qindex_offset > (7 * 4)) {
-        SVT_ERROR("Instance %u: %s must be [0 - %d]\n",
-                  channel_number + 1,
-                  "CRF",
-                  70);
+    if ((config->enable_adaptive_quantization || config->variance_boost_strength) &&
+        config->extended_crf_qindex_offset > (7 * 4)) {
+        SVT_ERROR("Instance %u: %s must be [0 - %d]\n", channel_number + 1, "CRF", 70);
         return_error = EB_ErrorBadParameter;
     }
     if (config->qp > MAX_QP_VALUE) {
@@ -528,7 +526,8 @@ EbErrorType svt_av1_verify_settings(SequenceControlSet *scs) {
 
     if (config->tune > 4) {
         SVT_ERROR(
-            "Instance %u: Invalid tune flag [0 - 4, 0: VQ, 1: PSNR, 2: SSIM, 3: Subjective SSIM, 4: Still Picture], your "
+            "Instance %u: Invalid tune flag [0 - 4, 0: VQ, 1: PSNR, 2: SSIM, 3: Subjective SSIM, 4: Still Picture], "
+            "your "
             "input: %d\n",
             channel_number + 1,
             config->tune);
@@ -654,9 +653,13 @@ EbErrorType svt_av1_verify_settings(SequenceControlSet *scs) {
     uint64_t pixel_count = (uint64_t)(scs->max_input_luma_width * scs->max_input_luma_height);
     if (pixel_count >= INPUT_SIZE_8K_TH) {
         if (config->enc_mode >= ENC_M2 && config->enc_mode <= ENC_M7) {
-            SVT_WARN("Instance %u: 8K and higher resolution support below M8 isn't officially supported. 64 GB of available memory are recommended.\n", channel_number + 1);
+            SVT_WARN(
+                "Instance %u: 8K and higher resolution support below M8 isn't officially supported. 64 GB of available "
+                "memory are recommended.\n",
+                channel_number + 1);
         } else if (config->enc_mode < ENC_M2) {
-            SVT_ERROR("Instance %u: 8K and higher resolution support is limited to M2 and faster presets.\n", channel_number + 1);
+            SVT_ERROR("Instance %u: 8K and higher resolution support is limited to M2 and faster presets.\n",
+                      channel_number + 1);
             return_error = EB_ErrorBadParameter;
         }
     }
@@ -833,7 +836,8 @@ EbErrorType svt_av1_verify_settings(SequenceControlSet *scs) {
             "--tile-columns 1 if you are targeting a high quality encode and a multi-core "
             "high-performance decoder HW\n");
     }
-    if (config->enable_qm && (config->min_qm_level > config->max_qm_level || config->min_chroma_qm_level > config->max_chroma_qm_level)) {
+    if (config->enable_qm &&
+        (config->min_qm_level > config->max_qm_level || config->min_chroma_qm_level > config->max_chroma_qm_level)) {
         SVT_ERROR("Instance %u:  Min quant matrix level must not greater than max quant matrix level\n",
                   channel_number + 1);
         return_error = EB_ErrorBadParameter;
@@ -1065,9 +1069,9 @@ EbErrorType svt_av1_set_default_params(EbSvtAv1EncConfiguration *config_ptr) {
     config_ptr->force_key_frames = 0;
 
     // Quant Matrices (QM)
-    config_ptr->enable_qm    = 1;
-    config_ptr->min_qm_level = 2;
-    config_ptr->max_qm_level = 15;
+    config_ptr->enable_qm           = 1;
+    config_ptr->min_qm_level        = 2;
+    config_ptr->max_qm_level        = 15;
     config_ptr->min_chroma_qm_level = 8;
     config_ptr->max_chroma_qm_level = 15;
 
@@ -1156,9 +1160,9 @@ void svt_av1_print_lib_params(SequenceControlSet *scs) {
                  config->enc_mode,
                  config->tune == 0       ? "VQ"
                      : config->tune == 1 ? "PSNR"
-                         : config->tune == 2 ? "SSIM"
-                             : config->tune == 3 ? "Subjective SSIM"
-                                             : "Still Picture",
+                     : config->tune == 2 ? "SSIM"
+                     : config->tune == 3 ? "Subjective SSIM"
+                                         : "Still Picture",
                  config->pred_structure == 1       ? "low delay"
                      : config->pred_structure == 2 ? "random access"
                                                    : "Unknown pred structure");
@@ -1234,30 +1238,25 @@ void svt_av1_print_lib_params(SequenceControlSet *scs) {
         default: break;
         }
 
-        SVT_INFO("SVT [config]: QP scale compress strength \t\t\t\t\t: %d\n",
-                 config->qp_scale_compress_strength);
+        SVT_INFO("SVT [config]: QP scale compress strength \t\t\t\t\t: %d\n", config->qp_scale_compress_strength);
 
         if (config->noise_norm_strength >= 0) {
-            SVT_INFO("SVT [config]: Noise Normalization Strength \t\t\t\t\t: %d\n",
-                config->noise_norm_strength);
+            SVT_INFO("SVT [config]: Noise Normalization Strength \t\t\t\t\t: %d\n", config->noise_norm_strength);
         }
 
         if (config->kf_tf_strength > 0 && config->enable_tf == 1) {
-            SVT_INFO("SVT [config]: Keyframe TF Strength \t\t\t\t\t\t: %d\n",
-                config->kf_tf_strength);
+            SVT_INFO("SVT [config]: Keyframe TF Strength \t\t\t\t\t\t: %d\n", config->kf_tf_strength);
         }
 
         if (config->psy_rd > 0.0) {
-            SVT_INFO("SVT [config]: PSY-RD Strength \t\t\t\t\t\t: %.2f\n",
-                    config->psy_rd);
+            SVT_INFO("SVT [config]: PSY-RD Strength \t\t\t\t\t\t: %.2f\n", config->psy_rd);
         }
         // 1 is full spy-rd, 2 is partial spy-rd
         SVT_INFO("SVT [config]: spy-rd \t\t\t\t\t\t\t: %s\n",
-        config->spy_rd == 1 ? "oui" : (config->spy_rd == 2 ? "ouais" : "non"));
+                 config->spy_rd == 1 ? "oui" : (config->spy_rd == 2 ? "ouais" : "non"));
 
-		if (config->low_q_taper) {
-            SVT_INFO("SVT [config]: Low Q Taper \t\t\t\t\t\t\t: %s\n",
-                    config->low_q_taper ? "On" : "Off");
+        if (config->low_q_taper) {
+            SVT_INFO("SVT [config]: Low Q Taper \t\t\t\t\t\t\t: %s\n", config->low_q_taper ? "On" : "Off");
         }
     }
 #ifdef DEBUG_BUFFERS
@@ -1381,8 +1380,8 @@ static EbErrorType str_to_uint(const char *nptr, uint32_t *out, char **nextptr) 
 }
 
 static EbErrorType str_to_double(const char *nptr, double *out, char **nextptr) {
-    char    *endptr;
-    double  val;
+    char  *endptr;
+    double val;
 
     val = strtod(nptr, &endptr);
 
@@ -1529,8 +1528,8 @@ static EbErrorType str_to_crf(const char *nptr, EbSvtAv1EncConfiguration *config
     if (crf < 0)
         return EB_ErrorBadParameter;
 
-    uint32_t extended_q_index = (uint32_t)(crf * 4);
-    uint32_t qp = AOMMIN(MAX_QP_VALUE, (uint32_t)crf);
+    uint32_t extended_q_index           = (uint32_t)(crf * 4);
+    uint32_t qp                         = AOMMIN(MAX_QP_VALUE, (uint32_t)crf);
     uint32_t extended_crf_qindex_offset = extended_q_index - qp * 4;
 
     config_struct->qp                           = qp;

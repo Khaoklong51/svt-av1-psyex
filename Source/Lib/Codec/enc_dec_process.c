@@ -2592,18 +2592,10 @@ static void perform_pred_depth_refinement(SequenceControlSet *scs, PictureContro
                         if (scs->static_config.max_32_tx_size) {
                             // Don't test depths that result in blocks greater than 32x32
                             switch (blk_geom->sq_size) {
-                                case 4:
-                                    s_depth = MAX(-3, s_depth);
-                                    break;
-                                case 8:
-                                    s_depth = MAX(-2, s_depth);
-                                    break;
-                                case 16:
-                                    s_depth = MAX(-1, s_depth);
-                                    break;
-                                case 32:
-                                    s_depth = MAX(0, s_depth);
-                                    break;
+                            case 4: s_depth = MAX(-3, s_depth); break;
+                            case 8: s_depth = MAX(-2, s_depth); break;
+                            case 16: s_depth = MAX(-1, s_depth); break;
+                            case 32: s_depth = MAX(0, s_depth); break;
                             }
                         }
 
@@ -2750,8 +2742,7 @@ static void recode_loop_decision_maker(PictureControlSet *pcs, SequenceControlSe
         if (scs->static_config.enable_adaptive_quantization == 2 && ppcs->tpl_ctrls.enable && ppcs->r0 != 0)
             svt_aom_sb_qp_derivation_tpl_la(pcs);
 
-        if (scs->static_config.enable_variance_boost && pcs->ppcs->frm_hdr.delta_q_params.delta_q_present)
-        {
+        if (scs->static_config.enable_variance_boost && pcs->ppcs->frm_hdr.delta_q_params.delta_q_present) {
             // adjust delta q res and normalize superblock delta q values to reduce signaling overhead
             normalize_sb_delta_q(pcs);
         }

@@ -2269,11 +2269,12 @@ static void model_rd_for_sb(PictureControlSet *pcs, EbPictureBufferDesc *predict
     // Note our transform coeffs are 8 times an orthogonal transform.
     // Hence quantizer step is also 8 times. To get effective quantizer
     // we need to divide by 8 before sending to modeling function.
-    uint64_t rate_sum = 0;
-    uint64_t dist_sum = 0;
-    SequenceControlSet *scs = pcs->ppcs->scs;
+    uint64_t            rate_sum = 0;
+    uint64_t            dist_sum = 0;
+    SequenceControlSet *scs      = pcs->ppcs->scs;
 
-    const double hvs_modulation_factor = get_hvs_modulation_factor(pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
+    const double hvs_modulation_factor = get_hvs_modulation_factor(
+        pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
     EbPictureBufferDesc *input_pic    = bit_depth > 8 ? pcs->input_frame16bit : pcs->ppcs->enhanced_pic;
     const uint32_t       input_offset = (ctx->blk_org_y + input_pic->org_y) * input_pic->stride_y +
         (ctx->blk_org_x + input_pic->org_x);
@@ -2286,9 +2287,9 @@ static void model_rd_for_sb(PictureControlSet *pcs, EbPictureBufferDesc *predict
                                               (prediction_ptr->org_y + ctx->blk_geom->org_y) *
                                                   prediction_ptr->stride_cb) /
         2;
-    const uint8_t hbd = (bit_depth > 8) ? 1 : 0;
+    const uint8_t         hbd                        = (bit_depth > 8) ? 1 : 0;
     EbSpatialFullDistType spatial_full_dist_type_fun = hbd ? svt_full_distortion_kernel16_bits_c
-                                                                     : svt_spatial_full_distortion_kernel;
+                                                           : svt_spatial_full_distortion_kernel;
     const uint16_t        blk_height                 = ctx->blk_geom->bheight;
     const uint8_t         shift = (ctx->ifs_ctrls.subsampled_distortion && (blk_height > 16)) ? 1 : 0;
     for (int32_t plane = plane_from; plane <= plane_to; ++plane) {

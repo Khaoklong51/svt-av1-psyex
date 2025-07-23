@@ -937,8 +937,8 @@ typedef struct PictureParentControlSet {
     int32_t      min_qmlevel;
     int32_t      max_qmlevel;
     // Chroma QMs
-    int32_t      min_chroma_qmlevel;
-    int32_t      max_chroma_qmlevel;
+    int32_t min_chroma_qmlevel;
+    int32_t max_chroma_qmlevel;
     // Encoder
     LoopFilterInfoN lf_info;
 

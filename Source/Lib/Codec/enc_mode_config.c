@@ -1813,32 +1813,30 @@ void svt_aom_sig_deriv_multi_processes(SequenceControlSet *scs, PictureParentCon
     pcs->tune_tpl_for_chroma = 0;
 #endif
     if (scs->enable_hbd_mode_decision == DEFAULT) {
+        if (pcs->scs->static_config.hbd_mds == 0) {
+            if (enc_mode <= ENC_M2)
+                pcs->hbd_md = 1;
+            //Empiral testing shows enabling full 10-bit MD greatly increases
+            //psy-rd performance once it becomes strong enough (>=0.6)
+            else if (enc_mode <= ENC_M4 && pcs->scs->static_config.psy_rd >= 0.6)
+                pcs->hbd_md = 1;
+            else if (enc_mode <= ENC_M6 && pcs->scs->static_config.psy_rd >= 0.6)
+                pcs->hbd_md = 2;
+            else if (enc_mode <= ENC_M6)
+                pcs->hbd_md = is_base ? 2 : 0;
+            else
+                pcs->hbd_md = is_islice ? 2 : 0;
 
-    if (pcs->scs->static_config.hbd_mds == 0) {
-        if (enc_mode <= ENC_M2)
+        } else if (pcs->scs->static_config.hbd_mds == 1) {
             pcs->hbd_md = 1;
-        //Empiral testing shows enabling full 10-bit MD greatly increases
-        //psy-rd performance once it becomes strong enough (>=0.6)
-        else if (enc_mode <= ENC_M4 && pcs->scs->static_config.psy_rd >= 0.6)
-            pcs->hbd_md = 1;
-        else if (enc_mode <= ENC_M6 && pcs->scs->static_config.psy_rd >= 0.6)
+
+        } else if (pcs->scs->static_config.hbd_mds == 2) {
             pcs->hbd_md = 2;
-        else if (enc_mode <= ENC_M6)
-            pcs->hbd_md = is_base ? 2 : 0;
-        else
-            pcs->hbd_md = is_islice ? 2 : 0;
 
-    } else if (pcs->scs->static_config.hbd_mds == 1){
-        pcs->hbd_md = 1;
-
-    } else if (pcs->scs->static_config.hbd_mds == 2) {
-        pcs->hbd_md = 2;
-
-    } else if (pcs->scs->static_config.hbd_mds == 3) {
-        pcs->hbd_md = 3;
-    }
-}
-    else
+        } else if (pcs->scs->static_config.hbd_mds == 3) {
+            pcs->hbd_md = 3;
+        }
+    } else
         pcs->hbd_md = scs->enable_hbd_mode_decision;
 
     pcs->max_can_count = svt_aom_get_max_can_count(enc_mode);
@@ -8463,7 +8461,7 @@ void svt_aom_sig_deriv_mode_decision_config(SequenceControlSet *scs, PictureCont
         }
     } else if (enc_mode <= ENC_MRP) {
         pcs->txs_level = 1;
-    //The following setting is M1 in mainline
+        //The following setting is M1 in mainline
     } else if (enc_mode <= ENC_M2) {
         pcs->txs_level = 2;
     } else if (enc_mode <= ENC_M3) {
@@ -8516,27 +8514,27 @@ void svt_aom_sig_deriv_mode_decision_config(SequenceControlSet *scs, PictureCont
         //Enable SSD mode decision L0 only when psy-rd>=0.6
         //as the quality benefits of SSD mode decision L0 are dubious
         //for the computational cost when not using the feature
-        if (pcs->scs->static_config.psy_rd >= 0.6){
+        if (pcs->scs->static_config.psy_rd >= 0.6) {
             if (enc_mode <= ENC_MR)
                 pcs->mds0_level = 1;
             //With P6 and slower when psy-rd is enabled, there are
             //great benefits to enabling SAD since unlike VAR,
             //psy-rd can actually modulate SAD for better perceptual quality using mds0_level
             else if (enc_mode <= ENC_M6)
-                 pcs->mds0_level = 0;
+                pcs->mds0_level = 0;
             else
                 pcs->mds0_level = is_islice ? 2 : 4;
         } else {
-        if (enc_mode <= ENC_MRP)
-            pcs->mds0_level = 1;
-        else if (enc_mode <= ENC_M4)
-            pcs->mds0_level = 2;
-        else if (enc_mode <= ENC_M5)
-            pcs->mds0_level = is_base ? 2 : 3;
-        else if (enc_mode <= ENC_M6)
-            pcs->mds0_level = is_islice ? 2 : 3;
-        else
-            pcs->mds0_level = is_islice ? 2 : 4;
+            if (enc_mode <= ENC_MRP)
+                pcs->mds0_level = 1;
+            else if (enc_mode <= ENC_M4)
+                pcs->mds0_level = 2;
+            else if (enc_mode <= ENC_M5)
+                pcs->mds0_level = is_base ? 2 : 3;
+            else if (enc_mode <= ENC_M6)
+                pcs->mds0_level = is_islice ? 2 : 3;
+            else
+                pcs->mds0_level = is_islice ? 2 : 4;
         }
     }
     /*
@@ -8847,7 +8845,7 @@ set lpd0_level
         // Upper QP cutoff: QP 39 = (63 - QP) * 3
         // ToDo: understand full implications of lambda adjustment on various encoding parts (TX search, TX partition, RDO...) to fully harness their advantage
         pcs->lambda_weight = CLIP3(0, 72, MIN(pcs->picture_qp * 4, (63 - pcs->picture_qp) * 3)) + 128;
-    }else if (!rtc_tune && !(enc_mode <= ENC_M0)) {
+    } else if (!rtc_tune && !(enc_mode <= ENC_M0)) {
         if (pcs->picture_qp >= 62) {
             pcs->lambda_weight = 300;
         } else if (pcs->picture_qp >= 56) {

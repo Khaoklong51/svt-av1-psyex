@@ -2148,14 +2148,15 @@ static void aom_av1_set_mb_ssim_rdmult_scaling(PictureParentControlSet *pcs) {
             const int index = row * num_cols + col;
 
             if (pcs->scs->static_config.tune == 3) {
-                const int mi_row = row << 2;
-                const int mi_col = col << 2;
+                const int mi_row       = row << 2;
+                const int mi_col       = col << 2;
                 const int row_offset_y = row << 2;
                 const int col_offset_y = col << 2;
 
                 // Loop through each 4x4 block within the 16x16 block.
                 for (int mi_row_3 = mi_row; mi_row_3 < cm->mi_rows && mi_row_3 < (row + 1) * num_mi_h; mi_row_3 += 1) {
-                    for (int mi_col_3 = mi_col; mi_col_3 < cm->mi_cols && mi_col_3 < (col + 1) * num_mi_w; mi_col_3 += 1) {
+                    for (int mi_col_3 = mi_col; mi_col_3 < cm->mi_cols && mi_col_3 < (col + 1) * num_mi_w;
+                         mi_col_3 += 1) {
                         const int row_offset_y_3 = mi_row_3 << 2;
                         const int col_offset_y_3 = mi_col_3 << 2;
 
@@ -2167,15 +2168,17 @@ static void aom_av1_set_mb_ssim_rdmult_scaling(PictureParentControlSet *pcs) {
                 }
                 // Loop through each 8x8 block within the 16x16 block.
                 for (int mi_row_2 = mi_row; mi_row_2 < cm->mi_rows && mi_row_2 < (row + 1) * num_mi_h; mi_row_2 += 2) {
-                    for (int mi_col_2 = mi_col; mi_col_2 < cm->mi_cols && mi_col_2 < (col + 1) * num_mi_w; mi_col_2 += 2) {
+                    for (int mi_col_2 = mi_col; mi_col_2 < cm->mi_cols && mi_col_2 < (col + 1) * num_mi_w;
+                         mi_col_2 += 2) {
                         const int row_offset_y_2 = mi_row_2 << 2;
                         const int col_offset_y_2 = mi_col_2 << 2;
 
                         const uint8_t *buf2 = y_buffer + row_offset_y_2 * y_stride + col_offset_y_2;
 
                         var += svt_aom_get_perpixel_variance(buf2, y_stride, BLOCK_8X8);
-                        num_of_var += 0.125; // This weight (8x8 block) is 2x more important compared to other num_of_var additions
-                                             // (0.5 of total num_of_var)
+                        num_of_var +=
+                            0.125; // This weight (8x8 block) is 2x more important compared to other num_of_var additions
+                        // (0.5 of total num_of_var)
                     }
                 }
                 const uint8_t *buf = y_buffer + row_offset_y * y_stride + col_offset_y;
@@ -2185,7 +2188,8 @@ static void aom_av1_set_mb_ssim_rdmult_scaling(PictureParentControlSet *pcs) {
             } else {
                 // Loop through each 8x8 block.
                 for (int mi_row = row * num_mi_h; mi_row < cm->mi_rows && mi_row < (row + 1) * num_mi_h; mi_row += 2) {
-                    for (int mi_col = col * num_mi_w; mi_col < cm->mi_cols && mi_col < (col + 1) * num_mi_w; mi_col += 2) {
+                    for (int mi_col = col * num_mi_w; mi_col < cm->mi_cols && mi_col < (col + 1) * num_mi_w;
+                         mi_col += 2) {
                         const int row_offset_y = mi_row << 2;
                         const int col_offset_y = mi_col << 2;
 
@@ -2243,35 +2247,29 @@ static void aom_av1_set_mb_ssim_rdmult_scaling(PictureParentControlSet *pcs) {
             }
         }
     } else { // Do superblock-based adjustment if we're on Tune 3
-        const int sb_size = pcs->scs->seq_header.sb_size;
+        const int sb_size     = pcs->scs->seq_header.sb_size;
         const int num_mi_w_sb = mi_size_wide[sb_size];
         const int num_mi_h_sb = mi_size_high[sb_size];
-        const int num_cols_sb =
-            (cm->mi_cols + num_mi_w_sb - 1) / num_mi_w_sb;
-        const int num_rows_sb =
-            (cm->mi_rows + num_mi_h_sb - 1) / num_mi_h_sb;
-        const int num_blk_w = num_mi_w_sb / num_mi_w;
-        const int num_blk_h = num_mi_h_sb / num_mi_h;
+        const int num_cols_sb = (cm->mi_cols + num_mi_w_sb - 1) / num_mi_w_sb;
+        const int num_rows_sb = (cm->mi_rows + num_mi_h_sb - 1) / num_mi_h_sb;
+        const int num_blk_w   = num_mi_w_sb / num_mi_w;
+        const int num_blk_h   = num_mi_h_sb / num_mi_h;
         for (int row = 0; row < num_rows_sb; ++row) {
             for (int col = 0; col < num_cols_sb; ++col) {
                 double log_sum_sb = 0.0;
-                double blk_count = 0.0;
-                for (int blk_row = row * num_blk_h;
-                    blk_row < (row + 1) * num_blk_h && blk_row < num_rows; ++blk_row) {
-                    for (int blk_col = col * num_blk_w;
-                        blk_col < (col + 1) * num_blk_w && blk_col < num_cols;
-                        ++blk_col) {
+                double blk_count  = 0.0;
+                for (int blk_row = row * num_blk_h; blk_row < (row + 1) * num_blk_h && blk_row < num_rows; ++blk_row) {
+                    for (int blk_col = col * num_blk_w; blk_col < (col + 1) * num_blk_w && blk_col < num_cols;
+                         ++blk_col) {
                         const int index = blk_row * num_cols + blk_col;
                         log_sum_sb += log(pcs->pa_me_data->ssim_rdmult_scaling_factors[index]);
                         blk_count += 1.0;
                     }
                 }
                 log_sum_sb = exp(log_sum_sb / blk_count);
-                for (int blk_row = row * num_blk_h;
-                    blk_row < (row + 1) * num_blk_h && blk_row < num_rows; ++blk_row) {
-                    for (int blk_col = col * num_blk_w;
-                        blk_col < (col + 1) * num_blk_w && blk_col < num_cols;
-                        ++blk_col) {
+                for (int blk_row = row * num_blk_h; blk_row < (row + 1) * num_blk_h && blk_row < num_rows; ++blk_row) {
+                    for (int blk_col = col * num_blk_w; blk_col < (col + 1) * num_blk_w && blk_col < num_cols;
+                         ++blk_col) {
                         const int index = blk_row * num_cols + blk_col;
                         pcs->pa_me_data->ssim_rdmult_scaling_factors[index] /= log_sum_sb;
                     }

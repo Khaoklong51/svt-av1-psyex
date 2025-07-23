@@ -83,13 +83,14 @@ uint64_t svt_spatial_full_distortion_kernel_c(uint8_t* input, uint32_t input_off
 }
 
 uint64_t svt_spatial_psy_distortion_kernel_c(uint8_t* input, uint32_t input_offset, uint32_t input_stride,
-                                              uint8_t* recon, int32_t recon_offset, uint32_t recon_stride,
-                                              uint32_t area_width, uint32_t area_height, double psy_rd) {
+                                             uint8_t* recon, int32_t recon_offset, uint32_t recon_stride,
+                                             uint32_t area_width, uint32_t area_height, double psy_rd) {
     uint64_t spatial_distortion = 0;
-    uint64_t psy_distortion = 0;
+    uint64_t psy_distortion     = 0;
 
     if (psy_rd > 0.0) {
-        uint64_t ac_distortion = svt_psy_distortion(input + input_offset, input_stride, recon + recon_offset, recon_stride, area_width, area_height);
+        uint64_t ac_distortion = svt_psy_distortion(
+            input + input_offset, input_stride, recon + recon_offset, recon_stride, area_width, area_height);
         psy_distortion = (uint64_t)(ac_distortion * psy_rd);
     }
 
@@ -114,22 +115,14 @@ uint64_t svt_spatial_psy_distortion_kernel_c(uint8_t* input, uint32_t input_offs
 // Facade that wraps the distortion metric formula with "spy-rd" adjustments
 uint64_t svt_spatial_full_distortion_kernel_facade(uint8_t* input, uint32_t input_offset, uint32_t input_stride,
                                                    uint8_t* recon, int32_t recon_offset, uint32_t recon_stride,
-                                                   uint32_t area_width, uint32_t area_height, bool hbd_md, PredictionMode mode,
-                                                   CompoundType compound_type, uint8_t temporal_layer_index,
-                                                   double psy_rd, uint8_t spy_rd) {
-
+                                                   uint32_t area_width, uint32_t area_height, bool hbd_md,
+                                                   PredictionMode mode, CompoundType compound_type,
+                                                   uint8_t temporal_layer_index, double psy_rd, uint8_t spy_rd) {
     EbSpatialFullDistType spatial_full_dist_type_fun = hbd_md ? svt_full_distortion_kernel16_bits
                                                               : svt_spatial_full_distortion_kernel;
 
     int64_t spatial_distortion = spatial_full_dist_type_fun(
-                        input,
-                        input_offset,
-                        input_stride,
-                        recon,
-                        recon_offset,
-                        recon_stride,
-                        area_width,
-                        area_height);
+        input, input_offset, input_stride, recon, recon_offset, recon_stride, area_width, area_height);
     //Only enable intra prediction tweaks when full spy-rd is active
     if (spy_rd == 1) {
         if (mode == DC_PRED || mode == SMOOTH_PRED || mode == SMOOTH_V_PRED || mode == SMOOTH_H_PRED) {

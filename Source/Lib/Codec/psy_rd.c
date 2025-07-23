@@ -17,44 +17,44 @@
 // 8-bit
 #define BITS_PER_SUM (8 * sizeof(sum_t))
 
-#define HADAMARD4(d0, d1, d2, d3, s0, s1, s2, s3) { \
-        sum2_t t0 = s0 + s1; \
-        sum2_t t1 = s0 - s1; \
-        sum2_t t2 = s2 + s3; \
-        sum2_t t3 = s2 - s3; \
-        d0 = t0 + t2; \
-        d2 = t0 - t2; \
-        d1 = t1 + t3; \
-        d3 = t1 - t3; \
-}
+#define HADAMARD4(d0, d1, d2, d3, s0, s1, s2, s3) \
+    {                                             \
+        sum2_t t0 = s0 + s1;                      \
+        sum2_t t1 = s0 - s1;                      \
+        sum2_t t2 = s2 + s3;                      \
+        sum2_t t3 = s2 - s3;                      \
+        d0        = t0 + t2;                      \
+        d2        = t0 - t2;                      \
+        d1        = t1 + t3;                      \
+        d3        = t1 - t3;                      \
+    }
 
 // in: a pseudo-simd number of the form x+(y<<EW)
 // return: abs(x)+(abs(y)<<16)
-static inline sum2_t abs2(sum2_t a)
-{
+static inline sum2_t abs2(sum2_t a) {
     const sum2_t mask = (a >> (BITS_PER_SUM - 1)) & (((sum2_t)1 << BITS_PER_SUM) + 1);
-    const sum2_t s = (mask << BITS_PER_SUM) - mask;
+    const sum2_t s    = (mask << BITS_PER_SUM) - mask;
     return (a + s) ^ s;
 }
 // 10-bit
 #define BITS_PER_SUM_HBD (8 * sizeof(sum_hbd_t))
-#define HADAMARD4_HBD(d0, d1, d2, d3, s0, s1, s2, s3) { \
-        sum2_hbd_t t0 = s0 + s1; \
-        sum2_hbd_t t1 = s0 - s1; \
-        sum2_hbd_t t2 = s2 + s3; \
-        sum2_hbd_t t3 = s2 - s3; \
-        d0 = t0 + t2; \
-        d2 = t0 - t2; \
-        d1 = t1 + t3; \
-        d3 = t1 - t3; \
-}
+#define HADAMARD4_HBD(d0, d1, d2, d3, s0, s1, s2, s3) \
+    {                                                 \
+        sum2_hbd_t t0 = s0 + s1;                      \
+        sum2_hbd_t t1 = s0 - s1;                      \
+        sum2_hbd_t t2 = s2 + s3;                      \
+        sum2_hbd_t t3 = s2 - s3;                      \
+        d0            = t0 + t2;                      \
+        d2            = t0 - t2;                      \
+        d1            = t1 + t3;                      \
+        d3            = t1 - t3;                      \
+    }
 
 // in: a pseudo-simd number of the form x+(y<<EW)
 // return: abs(x)+(abs(y)<<32)
-static inline sum2_hbd_t abs2_hbd(sum2_hbd_t a)
-{
+static inline sum2_hbd_t abs2_hbd(sum2_hbd_t a) {
     const sum2_hbd_t mask = (a >> (BITS_PER_SUM_HBD - 1)) & (((sum2_hbd_t)1 << BITS_PER_SUM_HBD) + 1);
-    const sum2_hbd_t s = (mask << BITS_PER_SUM_HBD) - mask;
+    const sum2_hbd_t s    = (mask << BITS_PER_SUM_HBD) - mask;
     return (a + s) ^ s;
 }
 
@@ -84,7 +84,7 @@ static uint64_t svt_sa8d_8x8(const uint8_t* s, uint32_t sp, const uint8_t* r, ui
     for (int i = 0; i < 4; i++) {
         HADAMARD4(a0, a1, a2, a3, tmp[0][i], tmp[1][i], tmp[2][i], tmp[3][i]);
         HADAMARD4(a4, a5, a6, a7, tmp[4][i], tmp[5][i], tmp[6][i], tmp[7][i]);
-        b0  = abs2(a0 + a4) + abs2(a0 - a4);
+        b0 = abs2(a0 + a4) + abs2(a0 - a4);
         b0 += abs2(a1 + a5) + abs2(a1 - a5);
         b0 += abs2(a2 + a6) + abs2(a2 - a6);
         b0 += abs2(a3 + a7) + abs2(a3 - a7);
@@ -99,12 +99,12 @@ static uint64_t svt_satd_4x4(const uint8_t* s, uint32_t sp, const uint8_t* r, ui
     sum2_t sum = 0;
 
     for (int i = 0; i < 4; i++, s += sp, r += rp) {
-        a0 = s[0] - r[0];
-        a1 = s[1] - r[1];
-        b0 = (a0 + a1) + ((a0 - a1) << BITS_PER_SUM);
-        a2 = s[2] - r[2];
-        a3 = s[3] - r[3];
-        b1 = (a2 + a3) + ((a2 - a3) << BITS_PER_SUM);
+        a0        = s[0] - r[0];
+        a1        = s[1] - r[1];
+        b0        = (a0 + a1) + ((a0 - a1) << BITS_PER_SUM);
+        a2        = s[2] - r[2];
+        a3        = s[3] - r[3];
+        b1        = (a2 + a3) + ((a2 - a3) << BITS_PER_SUM);
         tmp[i][0] = b0 + b1;
         tmp[i][1] = b0 - b1;
     }
@@ -117,14 +117,12 @@ static uint64_t svt_satd_4x4(const uint8_t* s, uint32_t sp, const uint8_t* r, ui
     return (uint64_t)(sum >> 1);
 }
 
-static uint64_t svt_psy_sad_nxn(const uint8_t bw, const uint8_t bh, const uint8_t* s,
-                                uint32_t sp, const uint8_t* r, uint32_t rp) {
+static uint64_t svt_psy_sad_nxn(const uint8_t bw, const uint8_t bh, const uint8_t* s, uint32_t sp, const uint8_t* r,
+                                uint32_t rp) {
     int sum = 0;
 
     for (int i = 0; i < bw; i++) {
-        for (int j = 0; j < bh; j++) {
-            sum += abs(s[j] - r[j]);
-        }
+        for (int j = 0; j < bh; j++) { sum += abs(s[j] - r[j]); }
         s += sp;
         r += rp;
     }
@@ -132,12 +130,10 @@ static uint64_t svt_psy_sad_nxn(const uint8_t bw, const uint8_t bh, const uint8_
     return sum;
 }
 
-uint64_t svt_psy_distortion(const uint8_t* input, uint32_t input_stride,
-                            const uint8_t* recon, uint32_t recon_stride,
+uint64_t svt_psy_distortion(const uint8_t* input, uint32_t input_stride, const uint8_t* recon, uint32_t recon_stride,
                             uint32_t width, uint32_t height) {
-
-    static uint8_t zero_buffer[8] = { 0 };
-    uint64_t total_nrg = 0;
+    static uint8_t zero_buffer[8] = {0};
+    uint64_t       total_nrg      = 0;
 
     if (width >= 8 && height >= 8) { /* 8x8 or larger */
         for (uint64_t i = 0; i < height; i += 8) {
@@ -191,7 +187,7 @@ static uint64_t svt_sa8d_8x8_hbd(const uint16_t* s, uint32_t sp, const uint16_t*
     for (int i = 0; i < 4; i++) {
         HADAMARD4(a0, a1, a2, a3, tmp[0][i], tmp[1][i], tmp[2][i], tmp[3][i]);
         HADAMARD4(a4, a5, a6, a7, tmp[4][i], tmp[5][i], tmp[6][i], tmp[7][i]);
-        b0  = abs2_hbd(a0 + a4) + abs2_hbd(a0 - a4);
+        b0 = abs2_hbd(a0 + a4) + abs2_hbd(a0 - a4);
         b0 += abs2_hbd(a1 + a5) + abs2_hbd(a1 - a5);
         b0 += abs2_hbd(a2 + a6) + abs2_hbd(a2 - a6);
         b0 += abs2_hbd(a3 + a7) + abs2_hbd(a3 - a7);
@@ -206,12 +202,12 @@ static uint64_t svt_satd_4x4_hbd(const uint16_t* s, uint32_t sp, const uint16_t*
     sum2_hbd_t sum = 0;
 
     for (int i = 0; i < 4; i++, s += sp, r += rp) {
-        a0 = s[0] - r[0];
-        a1 = s[1] - r[1];
-        b0 = (a0 + a1) + ((a0 - a1) << BITS_PER_SUM_HBD);
-        a2 = s[2] - r[2];
-        a3 = s[3] - r[3];
-        b1 = (a2 + a3) + ((a2 - a3) << BITS_PER_SUM_HBD);
+        a0        = s[0] - r[0];
+        a1        = s[1] - r[1];
+        b0        = (a0 + a1) + ((a0 - a1) << BITS_PER_SUM_HBD);
+        a2        = s[2] - r[2];
+        a3        = s[3] - r[3];
+        b1        = (a2 + a3) + ((a2 - a3) << BITS_PER_SUM_HBD);
         tmp[i][0] = b0 + b1;
         tmp[i][1] = b0 - b1;
     }
@@ -223,14 +219,12 @@ static uint64_t svt_satd_4x4_hbd(const uint16_t* s, uint32_t sp, const uint16_t*
 
     return (uint64_t)(sum >> 1);
 }
-static uint64_t svt_psy_sad_nxn_hbd(const uint8_t bw, const uint8_t bh, const uint16_t* s,
-                                    uint32_t sp, const uint16_t* r, uint32_t rp) {
+static uint64_t svt_psy_sad_nxn_hbd(const uint8_t bw, const uint8_t bh, const uint16_t* s, uint32_t sp,
+                                    const uint16_t* r, uint32_t rp) {
     uint64_t sum = 0;
 
     for (int i = 0; i < bw; i++) {
-        for (int j = 0; j < bh; j++) {
-            sum += abs(s[j] - r[j]);
-        }
+        for (int j = 0; j < bh; j++) { sum += abs(s[j] - r[j]); }
         s += sp;
         r += rp;
     }
@@ -238,11 +232,9 @@ static uint64_t svt_psy_sad_nxn_hbd(const uint8_t bw, const uint8_t bh, const ui
     return sum;
 }
 
-uint64_t svt_psy_distortion_hbd(const uint16_t* input, uint32_t input_stride,
-                                const uint16_t* recon, uint32_t recon_stride,
-                                uint32_t width, uint32_t height) {
-
-    static uint16_t zero_buffer[8] = { 0 };
+uint64_t svt_psy_distortion_hbd(const uint16_t* input, uint32_t input_stride, const uint16_t* recon,
+                                uint32_t recon_stride, uint32_t width, uint32_t height) {
+    static uint16_t zero_buffer[8] = {0};
 
     uint64_t total_nrg = 0;
 
@@ -274,10 +266,8 @@ uint64_t svt_psy_distortion_hbd(const uint16_t* input, uint32_t input_stride,
  * Public function that mirrors the arguments of `spatial_full_dist_type_fun()`
  */
 
-uint64_t get_svt_psy_full_dist(const void* s, uint32_t so, uint32_t sp,
-                               const void* r, uint32_t ro, uint32_t rp,
-                               uint32_t w, uint32_t h, uint8_t is_hbd,
-                               double psy_rd) {
+uint64_t get_svt_psy_full_dist(const void* s, uint32_t so, uint32_t sp, const void* r, uint32_t ro, uint32_t rp,
+                               uint32_t w, uint32_t h, uint8_t is_hbd, double psy_rd) {
     uint64_t dist;
 
     switch (is_hbd) {

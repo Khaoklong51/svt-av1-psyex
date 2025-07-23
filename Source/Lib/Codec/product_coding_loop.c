@@ -46,8 +46,7 @@ void     svt_aom_apply_segmentation_based_quantization(const BlockGeom *blk_geom
                                                        SuperBlock *sb_ptr, BlkStruct *blk_ptr);
 uint64_t svt_spatial_full_distortion_ssim_kernel(uint8_t *input, uint32_t input_offset, uint32_t input_stride,
                                                  uint8_t *recon, int32_t recon_offset, uint32_t recon_stride,
-                                                 uint32_t area_width, uint32_t area_height, bool hbd,
-                                                 double psy_rd);
+                                                 uint32_t area_width, uint32_t area_height, bool hbd, double psy_rd);
 void     aom_av1_set_ssim_rdmult(struct ModeDecisionContext *ctx, PictureControlSet *pcs, const int mi_row,
                                  const int mi_col);
 
@@ -967,9 +966,10 @@ static void product_coding_loop_init_fast_loop(PictureControlSet *pcs, ModeDecis
 static void fast_loop_core_light_pd0(ModeDecisionCandidateBuffer *cand_bf, PictureControlSet *pcs,
                                      ModeDecisionContext *ctx, EbPictureBufferDesc *input_pic,
                                      uint32_t input_origin_index, uint32_t cu_origin_index) {
-    ModeDecisionCandidate *cand = cand_bf->cand;
-    EbPictureBufferDesc   *pred = cand_bf->pred;
-    const double hvs_modulation_factor = get_hvs_modulation_factor(pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
+    ModeDecisionCandidate *cand                  = cand_bf->cand;
+    EbPictureBufferDesc   *pred                  = cand_bf->pred;
+    const double           hvs_modulation_factor = get_hvs_modulation_factor(
+        pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
 
     if (ctx->lpd0_ctrls.pd0_level == VERY_LIGHT_PD0) {
         MvReferenceFrame rf[2];
@@ -1137,7 +1137,8 @@ static void obmc_trans_face_off(ModeDecisionCandidateBuffer *cand_bf, PictureCon
     const uint32_t cu_origin_index          = loc->blk_origin_index;
     const uint32_t cu_chroma_origin_index   = loc->blk_chroma_origin_index;
 
-    const double hvs_modulation_factor = get_hvs_modulation_factor(pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
+    const double hvs_modulation_factor = get_hvs_modulation_factor(
+        pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
 
     uint32_t full_lambda = ctx->hbd_md ? ctx->full_lambda_md[EB_10_BIT_MD] : ctx->full_lambda_md[EB_8_BIT_MD];
     uint32_t fast_lambda = ctx->hbd_md ? ctx->fast_lambda_md[EB_10_BIT_MD] : ctx->fast_lambda_md[EB_8_BIT_MD];
@@ -1173,21 +1174,20 @@ static void obmc_trans_face_off(ModeDecisionCandidateBuffer *cand_bf, PictureCon
 
             // Distortion
             if (ctx->mds0_ctrls.mds0_dist_type == SSD) {
-                luma_fast_dist = svt_spatial_full_distortion_kernel_facade(
-                    input_pic->buffer_y,
-                    input_origin_index,
-                    input_pic->stride_y,
-                    pred->buffer_y,
-                    (int32_t)cu_origin_index,
-                    pred->stride_y,
-                    ctx->blk_geom->bwidth,
-                    ctx->blk_geom->bheight,
-                    ctx->hbd_md,
-                    cand_bf->cand->pred_mode,
-                    cand_bf->cand->interinter_comp.type,
-                    pcs->temporal_layer_index,
-                    hvs_modulation_factor,
-                    pcs->scs->static_config.spy_rd);
+                luma_fast_dist = svt_spatial_full_distortion_kernel_facade(input_pic->buffer_y,
+                                                                           input_origin_index,
+                                                                           input_pic->stride_y,
+                                                                           pred->buffer_y,
+                                                                           (int32_t)cu_origin_index,
+                                                                           pred->stride_y,
+                                                                           ctx->blk_geom->bwidth,
+                                                                           ctx->blk_geom->bheight,
+                                                                           ctx->hbd_md,
+                                                                           cand_bf->cand->pred_mode,
+                                                                           cand_bf->cand->interinter_comp.type,
+                                                                           pcs->temporal_layer_index,
+                                                                           hvs_modulation_factor,
+                                                                           pcs->scs->static_config.spy_rd);
                 luma_fast_dist += get_svt_psy_full_dist(input_pic->buffer_y,
                                                         input_origin_index,
                                                         input_pic->stride_y,
@@ -1232,12 +1232,12 @@ static void obmc_trans_face_off(ModeDecisionCandidateBuffer *cand_bf, PictureCon
                                                              ctx->blk_geom->bwidth));
                 } else {
                     cand_bf->luma_fast_dist = luma_fast_dist = sad_16b_kernel(
-                                                             ((uint16_t *)input_pic->buffer_y) + input_origin_index,
-                                                             input_pic->stride_y,
-                                                             ((uint16_t *)pred->buffer_y) + cu_origin_index,
-                                                             pred->stride_y,
-                                                             ctx->blk_geom->bheight,
-                                                             ctx->blk_geom->bwidth);
+                        ((uint16_t *)input_pic->buffer_y) + input_origin_index,
+                        input_pic->stride_y,
+                        ((uint16_t *)pred->buffer_y) + cu_origin_index,
+                        pred->stride_y,
+                        ctx->blk_geom->bheight,
+                        ctx->blk_geom->bwidth);
                 }
             }
             if (ctx->blk_geom->has_uv && ctx->uv_ctrls.uv_mode <= CHROMA_MODE_1 && ctx->mds_skip_uv_pred == false) {
@@ -1349,11 +1349,12 @@ void fast_loop_core(ModeDecisionCandidateBuffer *cand_bf, PictureControlSet *pcs
     const uint32_t cu_origin_index          = loc->blk_origin_index;
     const uint32_t cu_chroma_origin_index   = loc->blk_chroma_origin_index;
 
-    const double hvs_modulation_factor = get_hvs_modulation_factor(pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
-    uint64_t       luma_fast_dist;
-    uint64_t       chroma_fast_distortion = 0;
-    uint32_t       full_lambda = ctx->hbd_md ? ctx->full_lambda_md[EB_10_BIT_MD] : ctx->full_lambda_md[EB_8_BIT_MD];
-    uint32_t       fast_lambda = ctx->hbd_md ? ctx->fast_lambda_md[EB_10_BIT_MD] : ctx->fast_lambda_md[EB_8_BIT_MD];
+    const double hvs_modulation_factor = get_hvs_modulation_factor(
+        pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
+    uint64_t luma_fast_dist;
+    uint64_t chroma_fast_distortion = 0;
+    uint32_t full_lambda = ctx->hbd_md ? ctx->full_lambda_md[EB_10_BIT_MD] : ctx->full_lambda_md[EB_8_BIT_MD];
+    uint32_t fast_lambda = ctx->hbd_md ? ctx->fast_lambda_md[EB_10_BIT_MD] : ctx->fast_lambda_md[EB_8_BIT_MD];
 
     ModeDecisionCandidate *cand = cand_bf->cand;
     EbPictureBufferDesc   *pred = cand_bf->pred;
@@ -1367,7 +1368,7 @@ void fast_loop_core(ModeDecisionCandidateBuffer *cand_bf, PictureControlSet *pcs
     if (ctx->mds0_ctrls.mds0_dist_type == SSD) {
         EbSpatialFullDistType spatial_full_dist_type_fun = ctx->hbd_md ? svt_full_distortion_kernel16_bits
                                                                        : svt_spatial_full_distortion_kernel;
-        luma_fast_dist = spatial_full_dist_type_fun(input_pic->buffer_y,
+        luma_fast_dist                                   = spatial_full_dist_type_fun(input_pic->buffer_y,
                                                     input_origin_index,
                                                     input_pic->stride_y,
                                                     pred->buffer_y,
@@ -1423,19 +1424,19 @@ void fast_loop_core(ModeDecisionCandidateBuffer *cand_bf, PictureControlSet *pcs
                                                      ctx->blk_geom->bwidth));
         } else {
             cand_bf->luma_fast_dist = luma_fast_dist = sad_16b_kernel(
-                                                     ((uint16_t *)input_pic->buffer_y) + input_origin_index,
-                                                     input_pic->stride_y,
-                                                     ((uint16_t *)pred->buffer_y) + cu_origin_index,
-                                                     pred->stride_y,
-                                                     ctx->blk_geom->bheight,
-                                                     ctx->blk_geom->bwidth);
+                ((uint16_t *)input_pic->buffer_y) + input_origin_index,
+                input_pic->stride_y,
+                ((uint16_t *)pred->buffer_y) + cu_origin_index,
+                pred->stride_y,
+                ctx->blk_geom->bheight,
+                ctx->blk_geom->bwidth);
         }
     }
     if (ctx->blk_geom->has_uv && ctx->uv_ctrls.uv_mode <= CHROMA_MODE_1 && ctx->mds_skip_uv_pred == false) {
         if (ctx->mds0_ctrls.mds0_dist_type == SSD) {
             EbSpatialFullDistType spatial_full_dist_type_fun = ctx->hbd_md ? svt_full_distortion_kernel16_bits
                                                                            : svt_spatial_full_distortion_kernel;
-            chroma_fast_distortion = spatial_full_dist_type_fun(input_pic->buffer_cb,
+            chroma_fast_distortion                           = spatial_full_dist_type_fun(input_pic->buffer_cb,
                                                                 input_cb_origin_in_index,
                                                                 input_pic->stride_cb,
                                                                 cand_bf->pred->buffer_cb,
@@ -1848,7 +1849,9 @@ static void md_stage_0(PictureControlSet *pcs, ModeDecisionContext *ctx,
             if (apply_unipred_bias && is_inter_singleref_mode(cand_bf->cand->pred_mode)) {
                 *cand_bf->fast_cost = (*cand_bf->fast_cost * uni_psy_bias[pcs->picture_qp]) / 100;
             }
-            if (pcs->scs->static_config.tune == 3 && pcs->ppcs->slice_type == B_SLICE) { // Only somewhat reverse the uni psy bias on B-Frames, prevents sharp / squiggling(lack of a better term?) artifacting
+            if (pcs->scs->static_config.tune == 3 &&
+                pcs->ppcs->slice_type ==
+                    B_SLICE) { // Only somewhat reverse the uni psy bias on B-Frames, prevents sharp / squiggling(lack of a better term?) artifacting
                 *cand_bf->fast_cost = (*cand_bf->fast_cost * bi_psy_bias[pcs->picture_qp]) / 100;
             }
             if (*cand_bf->fast_cost < ctx->mds0_best_cost) {
@@ -2047,10 +2050,11 @@ static void md_full_pel_search(PictureControlSet *pcs, ModeDecisionContext *ctx,
                                int16_t *best_mvy, uint32_t *best_cost, uint8_t hbd_md) {
     // Mvcost params
     MV_COST_PARAMS mv_cost_params;
-    FrameHeader   *frm_hdr = &pcs->ppcs->frm_hdr;
-    uint32_t       rdmult  = dist_type != SAD ? ctx->full_lambda_md[hbd_md ? EB_10_BIT_MD : EB_8_BIT_MD]
-                                              : ctx->fast_lambda_md[hbd_md ? EB_10_BIT_MD : EB_8_BIT_MD];
-    const double hvs_modulation_factor = get_hvs_modulation_factor(pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
+    FrameHeader   *frm_hdr               = &pcs->ppcs->frm_hdr;
+    uint32_t       rdmult                = dist_type != SAD ? ctx->full_lambda_md[hbd_md ? EB_10_BIT_MD : EB_8_BIT_MD]
+                                                            : ctx->fast_lambda_md[hbd_md ? EB_10_BIT_MD : EB_8_BIT_MD];
+    const double   hvs_modulation_factor = get_hvs_modulation_factor(
+        pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
     svt_init_mv_cost_params(
         &mv_cost_params, ctx, &ctx->ref_mv, frm_hdr->quantization_params.base_q_idx, rdmult, hbd_md);
     uint64_t cost;
@@ -4447,7 +4451,8 @@ static void perform_tx_light_pd0(PictureControlSet *pcs, ModeDecisionContext *ct
                                  uint32_t qindex, uint64_t *y_coeff_bits, uint64_t *y_full_distortion) {
     ctx->three_quad_energy = 0;
 
-    const double hvs_modulation_factor = get_hvs_modulation_factor(pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
+    const double hvs_modulation_factor = get_hvs_modulation_factor(
+        pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
 
     TxSize tx_size = ctx->blk_geom->txsize[0];
 
@@ -4517,19 +4522,19 @@ static void perform_tx_light_pd0(PictureControlSet *pcs, ModeDecisionContext *ct
         bheight = txbheight < 64 ? txbheight : 32;
     }
     svt_aom_picture_full_distortion32_bits_single_facade(transf_coeff,
-                                                  recon_coeff,
-                                                  txbwidth < 64 ? txbwidth : 32,
-                                                  bwidth, // bwidth
-                                                  bheight, // bheight
-                                                  txbwidth,
-                                                  txbheight,
-                                                  y_full_distortion,
-                                                  cand_bf->eob.y[0],
-                                                  cand_bf->cand->pred_mode,
-                                                  cand_bf->cand->interinter_comp.type,
-                                                  pcs->temporal_layer_index,
-                                                  hvs_modulation_factor,
-                                                  pcs->scs->static_config.spy_rd);
+                                                         recon_coeff,
+                                                         txbwidth < 64 ? txbwidth : 32,
+                                                         bwidth, // bwidth
+                                                         bheight, // bheight
+                                                         txbwidth,
+                                                         txbheight,
+                                                         y_full_distortion,
+                                                         cand_bf->eob.y[0],
+                                                         cand_bf->cand->pred_mode,
+                                                         cand_bf->cand->interinter_comp.type,
+                                                         pcs->temporal_layer_index,
+                                                         hvs_modulation_factor,
+                                                         pcs->scs->static_config.spy_rd);
     y_full_distortion[DIST_CALC_RESIDUAL] += ctx->three_quad_energy;
     const int32_t shift                   = (MAX_TX_SCALE - av1_get_tx_scale_tab[tx_size]) * 2;
     y_full_distortion[DIST_CALC_RESIDUAL] = RIGHT_SIGNED_SHIFT(y_full_distortion[DIST_CALC_RESIDUAL], shift)
@@ -4614,8 +4619,9 @@ static void tx_type_search(PictureControlSet *pcs, ModeDecisionContext *ctx, Mod
     const bool is_inter    = (is_inter_mode(cand_bf->cand->pred_mode) || cand_bf->cand->use_intrabc) ? true : false;
     // Do not turn ON TXT search beyond this point
     const uint8_t only_dct_dct = search_dct_dct_only(pcs, ctx, cand_bf, ctx->tx_depth, is_inter) || tx_search_skip_flag;
-    const TxSetType tx_set_type = get_ext_tx_set_type(tx_size, is_inter, pcs->ppcs->frm_hdr.reduced_tx_set);
-    const double hvs_modulation_factor = get_hvs_modulation_factor(pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
+    const TxSetType tx_set_type           = get_ext_tx_set_type(tx_size, is_inter, pcs->ppcs->frm_hdr.reduced_tx_set);
+    const double    hvs_modulation_factor = get_hvs_modulation_factor(
+        pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
 
     // resize after checks on allowable TX types
     if (ctx->mds_subres_step == 2) {
@@ -4845,21 +4851,21 @@ static void tx_type_search(PictureControlSet *pcs, ModeDecisionContext *ctx, Mod
                                          PICTURE_BUFFER_DESC_Y_FLAG,
                                          ctx->hbd_md);
 
-                txb_full_distortion_txt[DIST_SSD][tx_type][DIST_CALC_PREDICTION] = svt_spatial_full_distortion_kernel_facade(
-                    input_pic->buffer_y,
-                    input_txb_origin_index,
-                    input_pic->stride_y,
-                    cand_bf->pred->buffer_y,
-                    (int32_t)txb_origin_index,
-                    cand_bf->pred->stride_y,
-                    cropped_tx_width,
-                    cropped_tx_height,
-                    ctx->hbd_md,
-                    cand_bf->cand->pred_mode,
-                    cand_bf->cand->interinter_comp.type,
-                    pcs->temporal_layer_index,
-                    hvs_modulation_factor,
-                    pcs->scs->static_config.spy_rd);
+                txb_full_distortion_txt[DIST_SSD][tx_type][DIST_CALC_PREDICTION] =
+                    svt_spatial_full_distortion_kernel_facade(input_pic->buffer_y,
+                                                              input_txb_origin_index,
+                                                              input_pic->stride_y,
+                                                              cand_bf->pred->buffer_y,
+                                                              (int32_t)txb_origin_index,
+                                                              cand_bf->pred->stride_y,
+                                                              cropped_tx_width,
+                                                              cropped_tx_height,
+                                                              ctx->hbd_md,
+                                                              cand_bf->cand->pred_mode,
+                                                              cand_bf->cand->interinter_comp.type,
+                                                              pcs->temporal_layer_index,
+                                                              hvs_modulation_factor,
+                                                              pcs->scs->static_config.spy_rd);
                 txb_full_distortion_txt[DIST_SSD][tx_type][DIST_CALC_PREDICTION] += get_svt_psy_full_dist(
                     input_pic->buffer_y,
                     input_txb_origin_index,
@@ -4871,21 +4877,21 @@ static void tx_type_search(PictureControlSet *pcs, ModeDecisionContext *ctx, Mod
                     cropped_tx_height,
                     ctx->hbd_md,
                     hvs_modulation_factor);
-                txb_full_distortion_txt[DIST_SSD][tx_type][DIST_CALC_RESIDUAL] = svt_spatial_full_distortion_kernel_facade(
-                    input_pic->buffer_y,
-                    input_txb_origin_index,
-                    input_pic->stride_y,
-                    recon_ptr->buffer_y,
-                    (int32_t)txb_origin_index,
-                    cand_bf->recon->stride_y,
-                    cropped_tx_width,
-                    cropped_tx_height,
-                    ctx->hbd_md,
-                    cand_bf->cand->pred_mode,
-                    cand_bf->cand->interinter_comp.type,
-                    pcs->temporal_layer_index,
-                    hvs_modulation_factor,
-                    pcs->scs->static_config.spy_rd);
+                txb_full_distortion_txt[DIST_SSD][tx_type][DIST_CALC_RESIDUAL] =
+                    svt_spatial_full_distortion_kernel_facade(input_pic->buffer_y,
+                                                              input_txb_origin_index,
+                                                              input_pic->stride_y,
+                                                              recon_ptr->buffer_y,
+                                                              (int32_t)txb_origin_index,
+                                                              cand_bf->recon->stride_y,
+                                                              cropped_tx_width,
+                                                              cropped_tx_height,
+                                                              ctx->hbd_md,
+                                                              cand_bf->cand->pred_mode,
+                                                              cand_bf->cand->interinter_comp.type,
+                                                              pcs->temporal_layer_index,
+                                                              hvs_modulation_factor,
+                                                              pcs->scs->static_config.spy_rd);
                 txb_full_distortion_txt[DIST_SSD][tx_type][DIST_CALC_RESIDUAL] += get_svt_psy_full_dist(
                     input_pic->buffer_y,
                     input_txb_origin_index,
@@ -5461,9 +5467,10 @@ static void perform_dct_dct_tx_light_pd1(PictureControlSet *pcs, ModeDecisionCon
     EbPictureBufferDesc *input_pic = ctx->hbd_md ? pcs->input_frame16bit : pcs->ppcs->enhanced_pic;
     const bool           is_inter  = is_inter_mode(cand_bf->cand->pred_mode) ? true : false;
 
-    const double hvs_modulation_factor = get_hvs_modulation_factor(pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
+    const double hvs_modulation_factor = get_hvs_modulation_factor(
+        pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
 
-    ctx->three_quad_energy         = 0;
+    ctx->three_quad_energy = 0;
     svt_aom_residual_kernel(input_pic->buffer_y,
                             loc->input_origin_index,
                             input_pic->stride_y,
@@ -5546,19 +5553,19 @@ static void perform_dct_dct_tx_light_pd1(PictureControlSet *pcs, ModeDecisionCon
     }
 
     svt_aom_picture_full_distortion32_bits_single_facade(&(((int32_t *)ctx->tx_coeffs->buffer_y)[0]),
-                                                  &(((int32_t *)recon_coeff_ptr->buffer_y)[0]),
-                                                  txbwidth < 64 ? txbwidth : 32,
-                                                  bwidth,
-                                                  bheight,
-                                                  txbwidth,
-                                                  txbheight,
-                                                  y_full_distortion,
-                                                  cand_bf->eob.y[0],
-                                                  cand_bf->cand->pred_mode,
-                                                  cand_bf->cand->interinter_comp.type,
-                                                  pcs->temporal_layer_index,
-                                                  hvs_modulation_factor,
-                                                  pcs->scs->static_config.spy_rd);
+                                                         &(((int32_t *)recon_coeff_ptr->buffer_y)[0]),
+                                                         txbwidth < 64 ? txbwidth : 32,
+                                                         bwidth,
+                                                         bheight,
+                                                         txbwidth,
+                                                         txbheight,
+                                                         y_full_distortion,
+                                                         cand_bf->eob.y[0],
+                                                         cand_bf->cand->pred_mode,
+                                                         cand_bf->cand->interinter_comp.type,
+                                                         pcs->temporal_layer_index,
+                                                         hvs_modulation_factor,
+                                                         pcs->scs->static_config.spy_rd);
     const int32_t shift                   = (MAX_TX_SCALE - av1_get_tx_scale_tab[tx_size]) * 2;
     y_full_distortion[DIST_CALC_RESIDUAL] = RIGHT_SIGNED_SHIFT(
         y_full_distortion[DIST_CALC_RESIDUAL] + ctx->three_quad_energy, shift);
@@ -5620,7 +5627,8 @@ static void perform_dct_dct_tx(PictureControlSet *pcs, ModeDecisionContext *ctx,
     const uint32_t input_txb_origin_index = (ctx->sb_origin_x + tx_org_x + input_pic->org_x) +
         ((ctx->sb_origin_y + tx_org_y + input_pic->org_y) * input_pic->stride_y);
 
-        const double hvs_modulation_factor = get_hvs_modulation_factor(pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
+    const double hvs_modulation_factor = get_hvs_modulation_factor(
+        pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
 
     // Y Residual
     if (!is_inter) {
@@ -5805,20 +5813,21 @@ static void perform_dct_dct_tx(PictureControlSet *pcs, ModeDecisionContext *ctx,
             y_full_distortion[DIST_SSIM][DIST_CALC_PREDICTION] <<= 4;
             y_full_distortion[DIST_SSIM][DIST_CALC_RESIDUAL] <<= 4;
         }
-        y_full_distortion[DIST_SSD][DIST_CALC_PREDICTION] = svt_spatial_full_distortion_kernel_facade(input_pic->buffer_y,
-                                                                                       input_txb_origin_index,
-                                                                                       input_pic->stride_y,
-                                                                                       cand_bf->pred->buffer_y,
-                                                                                       (int32_t)txb_origin_index,
-                                                                                       cand_bf->pred->stride_y,
-                                                                                       cropped_tx_width,
-                                                                                       cropped_tx_height,
-                                                                                       ctx->hbd_md,
-                                                                                       cand_bf->cand->pred_mode,
-                                                                                       cand_bf->cand->interinter_comp.type,
-                                                                                       pcs->temporal_layer_index,
-                                                                                       hvs_modulation_factor,
-                                                                                       pcs->scs->static_config.spy_rd);
+        y_full_distortion[DIST_SSD][DIST_CALC_PREDICTION] = svt_spatial_full_distortion_kernel_facade(
+            input_pic->buffer_y,
+            input_txb_origin_index,
+            input_pic->stride_y,
+            cand_bf->pred->buffer_y,
+            (int32_t)txb_origin_index,
+            cand_bf->pred->stride_y,
+            cropped_tx_width,
+            cropped_tx_height,
+            ctx->hbd_md,
+            cand_bf->cand->pred_mode,
+            cand_bf->cand->interinter_comp.type,
+            pcs->temporal_layer_index,
+            hvs_modulation_factor,
+            pcs->scs->static_config.spy_rd);
         y_full_distortion[DIST_SSD][DIST_CALC_PREDICTION] += get_svt_psy_full_dist(input_pic->buffer_y,
                                                                                    input_txb_origin_index,
                                                                                    input_pic->stride_y,
@@ -5829,20 +5838,21 @@ static void perform_dct_dct_tx(PictureControlSet *pcs, ModeDecisionContext *ctx,
                                                                                    cropped_tx_height,
                                                                                    ctx->hbd_md,
                                                                                    hvs_modulation_factor);
-        y_full_distortion[DIST_SSD][DIST_CALC_RESIDUAL]   = svt_spatial_full_distortion_kernel_facade(input_pic->buffer_y,
-                                                                                     input_txb_origin_index,
-                                                                                     input_pic->stride_y,
-                                                                                     recon_ptr->buffer_y,
-                                                                                     (int32_t)txb_origin_index,
-                                                                                     cand_bf->recon->stride_y,
-                                                                                     cropped_tx_width,
-                                                                                     cropped_tx_height,
-                                                                                     ctx->hbd_md,
-                                                                                     cand_bf->cand->pred_mode,
-                                                                                     cand_bf->cand->interinter_comp.type,
-                                                                                     pcs->temporal_layer_index,
-                                                                                     hvs_modulation_factor,
-                                                                                     pcs->scs->static_config.spy_rd);
+        y_full_distortion[DIST_SSD][DIST_CALC_RESIDUAL] = svt_spatial_full_distortion_kernel_facade(
+            input_pic->buffer_y,
+            input_txb_origin_index,
+            input_pic->stride_y,
+            recon_ptr->buffer_y,
+            (int32_t)txb_origin_index,
+            cand_bf->recon->stride_y,
+            cropped_tx_width,
+            cropped_tx_height,
+            ctx->hbd_md,
+            cand_bf->cand->pred_mode,
+            cand_bf->cand->interinter_comp.type,
+            pcs->temporal_layer_index,
+            hvs_modulation_factor,
+            pcs->scs->static_config.spy_rd);
         y_full_distortion[DIST_SSD][DIST_CALC_RESIDUAL] += get_svt_psy_full_dist(input_pic->buffer_y,
                                                                                  input_txb_origin_index,
                                                                                  input_pic->stride_y,
@@ -5870,19 +5880,19 @@ static void perform_dct_dct_tx(PictureControlSet *pcs, ModeDecisionContext *ctx,
         }
 
         svt_aom_picture_full_distortion32_bits_single_facade(&(((int32_t *)ctx->tx_coeffs->buffer_y)[txb_1d_offset]),
-                                                      &(((int32_t *)recon_coeff_ptr->buffer_y)[txb_1d_offset]),
-                                                      txbwidth < 64 ? txbwidth : 32,
-                                                      bwidth,
-                                                      bheight,
-                                                      txbwidth,
-                                                      txbheight,
-                                                      y_full_distortion[DIST_SSD],
-                                                      cand_bf->eob.y[txb_itr],
-                                                      cand_bf->cand->pred_mode,
-                                                      cand_bf->cand->interinter_comp.type,
-                                                      pcs->temporal_layer_index,
-                                                      hvs_modulation_factor,
-                                                      pcs->scs->static_config.spy_rd);
+                                                             &(((int32_t *)recon_coeff_ptr->buffer_y)[txb_1d_offset]),
+                                                             txbwidth < 64 ? txbwidth : 32,
+                                                             bwidth,
+                                                             bheight,
+                                                             txbwidth,
+                                                             txbheight,
+                                                             y_full_distortion[DIST_SSD],
+                                                             cand_bf->eob.y[txb_itr],
+                                                             cand_bf->cand->pred_mode,
+                                                             cand_bf->cand->interinter_comp.type,
+                                                             pcs->temporal_layer_index,
+                                                             hvs_modulation_factor,
+                                                             pcs->scs->static_config.spy_rd);
         y_full_distortion[DIST_SSD][DIST_CALC_RESIDUAL] += ctx->three_quad_energy;
         y_full_distortion[DIST_SSD][DIST_CALC_PREDICTION] += ctx->three_quad_energy;
 
@@ -8092,10 +8102,8 @@ static void estimate_ref_frames_num_bits(struct ModeDecisionContext *ctx, Pictur
 static void calc_scr_to_recon_dist_per_quadrant(ModeDecisionContext *ctx, EbPictureBufferDesc *input_pic,
                                                 const uint32_t               input_origin_index,
                                                 const uint32_t               input_cb_origin_in_index,
-                                                ModeDecisionCandidateBuffer  *cand_bf,
-                                                const uint32_t               blk_origin_index,
-                                                const uint32_t               blk_chroma_origin_index,
-                                                const double                 psy_rd) {
+                                                ModeDecisionCandidateBuffer *cand_bf, const uint32_t blk_origin_index,
+                                                const uint32_t blk_chroma_origin_index, const double psy_rd) {
     EbPictureBufferDesc *recon_ptr = cand_bf->recon;
 
     EbSpatialFullDistType spatial_full_dist_type_fun = ctx->hbd_md ? svt_full_distortion_kernel16_bits
@@ -8962,7 +8970,8 @@ static void md_encode_block_light_pd1(PictureControlSet *pcs, ModeDecisionContex
     //Get the new lambda for current block
     if (pcs->ppcs->blk_lambda_tuning) {
         svt_aom_set_tuned_blk_lambda(ctx, pcs);
-    } else if (pcs->ppcs->scs->static_config.tune == 2 || pcs->ppcs->scs->static_config.tune == 3 || pcs->ppcs->scs->static_config.tune == 4) {
+    } else if (pcs->ppcs->scs->static_config.tune == 2 || pcs->ppcs->scs->static_config.tune == 3 ||
+               pcs->ppcs->scs->static_config.tune == 4) {
         int mi_row = ctx->blk_org_y / 4;
         int mi_col = ctx->blk_org_x / 4;
         aom_av1_set_ssim_rdmult(ctx, pcs, mi_row, mi_col);
@@ -9315,9 +9324,10 @@ static void md_encode_block(PictureControlSet *pcs, ModeDecisionContext *ctx, ui
     ModeDecisionCandidateBuffer **cand_bf_ptr_array;
     const BlockGeom              *blk_geom = ctx->blk_geom;
 
-    const double hvs_modulation_factor = get_hvs_modulation_factor(pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
+    const double hvs_modulation_factor = get_hvs_modulation_factor(
+        pcs->scs->static_config.psy_rd, pcs->slice_type == I_SLICE, pcs->temporal_layer_index);
 
-    BlockLocation                 loc;
+    BlockLocation loc;
     loc.input_origin_index = (ctx->blk_org_y + input_pic->org_y) * input_pic->stride_y +
         (ctx->blk_org_x + input_pic->org_x);
     loc.input_cb_origin_in_index = ((ctx->round_origin_y >> 1) + (input_pic->org_y >> 1)) * input_pic->stride_cb +
@@ -9335,7 +9345,8 @@ static void md_encode_block(PictureControlSet *pcs, ModeDecisionContext *ctx, ui
     //Get the new lambda for current block
     if (pcs->ppcs->blk_lambda_tuning) {
         svt_aom_set_tuned_blk_lambda(ctx, pcs);
-    } else if (pcs->ppcs->scs->static_config.tune == 2 || pcs->ppcs->scs->static_config.tune == 3 || pcs->ppcs->scs->static_config.tune == 4) {
+    } else if (pcs->ppcs->scs->static_config.tune == 2 || pcs->ppcs->scs->static_config.tune == 3 ||
+               pcs->ppcs->scs->static_config.tune == 4) {
         int mi_row = ctx->blk_org_y / 4;
         int mi_col = ctx->blk_org_x / 4;
         aom_av1_set_ssim_rdmult(ctx, pcs, mi_row, mi_col);
@@ -9616,11 +9627,15 @@ static void md_encode_block(PictureControlSet *pcs, ModeDecisionContext *ctx, ui
         loc.blk_origin_index = blk_geom->org_x + blk_geom->org_y * ctx->sb_size;
     }
     // 3rd Full-Loop
-    ctx->md_stage        = MD_STAGE_3;
+    ctx->md_stage = MD_STAGE_3;
     //This is a big difference compared to mainline
     //We only set SSIM mode decision (Level 1), since SSIM TX, or level 3, is
     //just not worth it because of bluriness; tune 2 will be set back to level 1
-    ctx->tune_ssim_level = (pcs->scs->static_config.tune == 2 || pcs->scs->static_config.tune == 3 || pcs->scs->static_config.tune == 4) && (ctx->pd_pass == PD_PASS_1) ? SSIM_LVL_1 : SSIM_LVL_0;
+    ctx->tune_ssim_level = (pcs->scs->static_config.tune == 2 || pcs->scs->static_config.tune == 3 ||
+                            pcs->scs->static_config.tune == 4) &&
+            (ctx->pd_pass == PD_PASS_1)
+        ? SSIM_LVL_1
+        : SSIM_LVL_0;
     md_stage_3(pcs,
                ctx,
                input_pic,
